@@ -4,7 +4,7 @@ import org.springframework.boot.configurationprocessor.json.JSONObject
 import ru.nikstep.pluto.entity.PullRequest
 import ru.nikstep.pluto.repo.PullRequestRepository
 
-class PullRequestService(var pullRequestRepository: PullRequestRepository) {
+class PullRequestSavingService(var pullRequestRepository: PullRequestRepository) {
 
     fun storePullRequest(payload: String) {
         val pullRequest = JSONObject(payload).getJSONObject("pull_request")
