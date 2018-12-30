@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/plagan
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+security:
+  oauth2:
+    client:
+      clientId: fa208beec8ce9fee4d77
+      clientSecret: dbaed4f6fe45d74f803561db0c4236dc5b838843
+      accessTokenUri: https://github.com/login/oauth/access_token
+      userAuthorizationUri: https://github.com/login/oauth/authorize
+    resource:
+      userInfoUri: https://api.github.com/user
+    sso:
+      loginPath: /authorization-code/callback
+server:
+  port: 80
