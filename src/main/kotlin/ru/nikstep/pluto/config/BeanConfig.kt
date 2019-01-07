@@ -4,20 +4,29 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.nikstep.pluto.repo.PullRequestRepository
 import ru.nikstep.pluto.repo.RepositoryRepository
-import ru.nikstep.pluto.service.EmptyPlagiarismService
-import ru.nikstep.pluto.service.PlagiarismService
-import ru.nikstep.pluto.service.PullRequestLoadingService
-import ru.nikstep.pluto.service.PullRequestSavingService
+import ru.nikstep.pluto.repo.SourceCodeRepository
+import ru.nikstep.pluto.repo.UserRepository
+import ru.nikstep.pluto.service.*
 
 @Configuration
 class BeanConfig {
 
     @Bean
+    fun sourceCodeService(
+        sourceCodeRepository: SourceCodeRepository,
+        userRepository: UserRepository,
+        repositoryRepository: RepositoryRepository
+    ): SourceCodeService {
+        return SourceCodeService(sourceCodeRepository, userRepository, repositoryRepository)
+    }
+
+    @Bean
     fun pullRequestService(
         pullRequestRepository: PullRequestRepository,
-        repositoryRepository: RepositoryRepository
+        repositoryRepository: RepositoryRepository,
+        sourceCodeService: SourceCodeService
     ): PullRequestSavingService {
-        return PullRequestSavingService(pullRequestRepository, repositoryRepository)
+        return PullRequestSavingService(pullRequestRepository, repositoryRepository, sourceCodeService)
     }
 
     @Bean

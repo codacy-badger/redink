@@ -13,7 +13,7 @@ class Repository {
     @Column(name = "pattern")
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "repository_pattern", joinColumns = arrayOf(JoinColumn(name = "repository")))
-    var filePatterns: MutableList<String>? = mutableListOf()
+    var filePatterns: MutableList<String> = mutableListOf()
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

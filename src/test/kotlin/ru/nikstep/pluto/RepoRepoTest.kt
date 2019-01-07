@@ -16,9 +16,7 @@ class RepoRepoTest {
 
     @Test
     fun test() {
-
         repositoryRepository.findAll().get(0).filePatterns
-
     }
 
 }
