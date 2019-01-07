@@ -11,7 +11,7 @@ class SourceCode(
     @JoinColumn(name = "repo")
     val repo: Repository,
     val fileName: String,
-    val fileText: String
+    var fileText: String
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,6 +12,11 @@ import ru.nikstep.pluto.service.*
 class BeanConfig {
 
     @Bean
+    fun githubAppService(): GithubAppService {
+        return SimpleGithubAppService()
+    }
+
+    @Bean
     fun sourceCodeService(
         sourceCodeRepository: SourceCodeRepository,
         userRepository: UserRepository,
@@ -24,9 +29,15 @@ class BeanConfig {
     fun pullRequestService(
         pullRequestRepository: PullRequestRepository,
         repositoryRepository: RepositoryRepository,
-        sourceCodeService: SourceCodeService
+        sourceCodeService: SourceCodeService,
+        githubAppService: GithubAppService
     ): PullRequestSavingService {
-        return PullRequestSavingService(pullRequestRepository, repositoryRepository, sourceCodeService)
+        return PullRequestSavingService(
+            pullRequestRepository,
+            repositoryRepository,
+            sourceCodeService,
+            githubAppService
+        )
     }
 
     @Bean

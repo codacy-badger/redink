@@ -20,6 +20,8 @@ class SourceCodeService(
 
         if (sourceCode == null) {
             sourceCode = SourceCode(user, repo, fileName, fileText)
+        } else {
+            sourceCode.fileText = fileText
         }
 
         sourceCodeRepository.save(sourceCode)

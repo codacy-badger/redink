@@ -2,10 +2,7 @@ package ru.nikstep.pluto.service
 
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.ResponseDeserializable
-import com.github.kittinunf.fuel.httpGet
-import org.apache.commons.codec.binary.Base64
-import org.apache.http.impl.client.HttpClients
-import org.springframework.boot.configurationprocessor.json.JSONArray
+import com.github.kittinunf.fuel.httpPost
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import ru.nikstep.pluto.repo.PullRequestRepository
 import ru.nikstep.pluto.repo.RepositoryRepository
@@ -16,11 +13,13 @@ import java.nio.charset.Charset
 class PullRequestSavingService(
     val pullRequestRepository: PullRequestRepository,
     val repositoryRepository: RepositoryRepository,
-    val sourceCodeService: SourceCodeService
+    val sourceCodeService: SourceCodeService,
+    val githubAppService: GithubAppService
 ) {
 
-    val fileLinkPattern = "https://api.github.com/repos/%s/contents/%s?ref=%s"
-    val httpclient = HttpClients.createDefault()
+    val graphqlApi = "https://api.github.com/graphql"
+    val fileLinkPattern =
+        "{\"query\": \"query {repository(name: \\\"%s\\\", owner: \\\"%s\\\") {object(expression: \\\"%s:%s\\\") {... on Blob{text}}}}\"}"
 
     fun storePullRequest(payload: String) {
         val jsonPayload = JSONObject(payload)
@@ -28,37 +27,26 @@ class PullRequestSavingService(
         val creatorName = pullRequest.getJSONObject("user").getString("login")
 
         val branchName = pullRequest.getJSONObject("head").getString("ref")
-        val repoName = jsonPayload.getJSONObject("repository").getString("full_name")
+        val repo = jsonPayload.getJSONObject("repository")
+        val repoName = repo.getString("name")
+        val fullRepoName = repo.getString("full_name")
+        val repoOwner = repo.getJSONObject("owner").getString("login")
 
-        val filePatterns = repositoryRepository.findByName(repoName).filePatterns
+        val filePatterns = repositoryRepository.findByName(fullRepoName).filePatterns
 
         for (fileName in filePatterns) {
-            val fileResponse = getObjectResponse(format(fileLinkPattern, repoName, fileName, branchName))
-            val fileData = String(Base64.decodeBase64(fileResponse.getString("content")))
-            sourceCodeService.save(creatorName, repoName, fileName, fileData)
+            val fileResponse = graphqlApi.httpPost()
+                .header("Authorization" to githubAppService.getAccessToken())
+                .body(format(fileLinkPattern, repoName, repoOwner, branchName, fileName))
+                .responseObject(JsonObjectDeserializer()).third.get()
+            val fileData =
+                fileResponse.getJSONObject("data").getJSONObject("repository").getJSONObject("object").getString("text")
+            sourceCodeService.save(creatorName, fullRepoName, fileName, fileData)
         }
-    }
-
-    fun getArrayResponse(link: String): JSONArray {
-        val responseObject = link.httpGet()
-            .header("Authorization" to "Bearer 6607b3c34fefa69c7b6f0d375eb9af0085e37dc0")
-            .responseObject(JsonArrayDeserializer())
-        return responseObject.third.get()
-    }
-
-    fun getObjectResponse(link: String): JSONObject {
-        val responseObject = link.httpGet()
-            .header("Authorization" to "Bearer 6607b3c34fefa69c7b6f0d375eb9af0085e37dc0")
-            .responseObject(JsonObjectDeserializer())
-        return responseObject.third.get()
     }
 
     class JsonObjectDeserializer(private val charset: Charset = Charsets.UTF_8) : ResponseDeserializable<JSONObject> {
         override fun deserialize(response: Response): JSONObject = JSONObject(String(response.data, charset))
-    }
-
-    class JsonArrayDeserializer(private val charset: Charset = Charsets.UTF_8) : ResponseDeserializable<JSONArray> {
-        override fun deserialize(response: Response): JSONArray = JSONArray(String(response.data, charset))
     }
 
 }
