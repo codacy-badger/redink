@@ -17,6 +17,7 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "http://repo.spring.io/libs-release" }
 }
 
 dependencies {
@@ -43,6 +44,8 @@ dependencies {
 
     compile 'org.apache.logging.log4j:log4j-api:2.11.1'
     compile 'org.apache.logging.log4j:log4j-core:2.11.1'
+
+    compile group: 'com.github.kittinunf.fuel', name: 'fuel', version: '1.15.0'
 
     testCompile 'org.jetbrains.kotlin:kotlin-test'
     testCompile 'org.jetbrains.kotlin:kotlin-test-junit'

@@ -3,6 +3,7 @@ package ru.nikstep.pluto.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.nikstep.pluto.repo.PullRequestRepository
+import ru.nikstep.pluto.repo.RepositoryRepository
 import ru.nikstep.pluto.service.EmptyPlagiarismService
 import ru.nikstep.pluto.service.PlagiarismService
 import ru.nikstep.pluto.service.PullRequestLoadingService
@@ -12,8 +13,11 @@ import ru.nikstep.pluto.service.PullRequestSavingService
 class BeanConfig {
 
     @Bean
-    fun pullRequestService(pullRequestRepository: PullRequestRepository): PullRequestSavingService {
-        return PullRequestSavingService(pullRequestRepository)
+    fun pullRequestService(
+        pullRequestRepository: PullRequestRepository,
+        repositoryRepository: RepositoryRepository
+    ): PullRequestSavingService {
+        return PullRequestSavingService(pullRequestRepository, repositoryRepository)
     }
 
     @Bean
