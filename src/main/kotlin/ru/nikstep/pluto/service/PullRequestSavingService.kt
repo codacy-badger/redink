@@ -14,13 +14,15 @@ class PullRequestSavingService(
     val pullRequestRepository: PullRequestRepository,
     val repositoryRepository: RepositoryRepository,
     val sourceCodeService: SourceCodeService,
-    val githubAppService: GithubAppService
+    val githubAppService: GithubAppService,
+    val analysisResultService: AnalysisResultService
 ) {
 
     val graphqlApi = "https://api.github.com/graphql"
     val fileLinkPattern =
         "{\"query\": \"query {repository(name: \\\"%s\\\", owner: \\\"%s\\\") {object(expression: \\\"%s:%s\\\") {... on Blob{text}}}}\"}"
 
+    @Synchronized
     fun storePullRequest(payload: String) {
         val jsonPayload = JSONObject(payload)
 
@@ -30,6 +32,7 @@ class PullRequestSavingService(
         val creatorName = pullRequest.getJSONObject("user").getString("login")
 
         val branchName = pullRequest.getJSONObject("head").getString("ref")
+        val headSha = pullRequest.getJSONObject("head").getString("sha")
         val repo = jsonPayload.getJSONObject("repository")
         val repoName = repo.getString("name")
         val fullRepoName = repo.getString("full_name")
@@ -45,6 +48,7 @@ class PullRequestSavingService(
             val fileData =
                 fileResponse.getJSONObject("data").getJSONObject("repository").getJSONObject("object").getString("text")
             sourceCodeService.save(creatorName, fullRepoName, fileName, fileData)
+            analysisResultService.send(installationId, fullRepoName, headSha)
         }
     }
 

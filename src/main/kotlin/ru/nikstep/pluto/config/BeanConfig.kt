@@ -17,6 +17,11 @@ class BeanConfig {
     }
 
     @Bean
+    fun analysisResultService(githubAppService: GithubAppService): AnalysisResultService {
+        return AnalysisResultService(githubAppService)
+    }
+
+    @Bean
     fun sourceCodeService(
         sourceCodeRepository: SourceCodeRepository,
         userRepository: UserRepository,
@@ -30,13 +35,15 @@ class BeanConfig {
         pullRequestRepository: PullRequestRepository,
         repositoryRepository: RepositoryRepository,
         sourceCodeService: SourceCodeService,
-        githubAppService: GithubAppService
+        githubAppService: GithubAppService,
+        analysisResultService: AnalysisResultService
     ): PullRequestSavingService {
         return PullRequestSavingService(
             pullRequestRepository,
             repositoryRepository,
             sourceCodeService,
-            githubAppService
+            githubAppService,
+            analysisResultService
         )
     }
 
