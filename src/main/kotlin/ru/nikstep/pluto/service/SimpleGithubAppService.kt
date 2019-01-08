@@ -1,12 +1,12 @@
 package ru.nikstep.pluto.service
 
-import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
 import ru.nikstep.pluto.entity.User
 import java.io.File
 
 class SimpleGithubAppService : GithubAppService {
     override fun getAccessToken(installationId: Int): String {
-        return "Bearer " + "https://api.github.com/app/installations/$installationId/access_tokens".httpGet()
+        return "Bearer " + "https://api.github.com/app/installations/$installationId/access_tokens".httpPost()
             .header(
                 "Authorization" to getToken(),
                 "Accept" to "application/vnd.github.machine-man-preview+json"
@@ -22,7 +22,8 @@ class SimpleGithubAppService : GithubAppService {
         val file = File("src/main/resources/keygen.rb").absolutePath
         val process = Runtime.getRuntime().exec("ruby $file")
         process.waitFor()
-        return "Bearer " + process.inputStream.bufferedReader().readText()
+        val token = "Bearer " + process.inputStream.bufferedReader().readText().replace("\n", "")
+        return token
     }
 
 }

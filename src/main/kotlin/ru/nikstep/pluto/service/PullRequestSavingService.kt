@@ -23,6 +23,9 @@ class PullRequestSavingService(
 
     fun storePullRequest(payload: String) {
         val jsonPayload = JSONObject(payload)
+
+        val installationId = jsonPayload.getJSONObject("installation").getInt("id")
+
         val pullRequest = jsonPayload.getJSONObject("pull_request")
         val creatorName = pullRequest.getJSONObject("user").getString("login")
 
@@ -36,7 +39,7 @@ class PullRequestSavingService(
 
         for (fileName in filePatterns) {
             val fileResponse = graphqlApi.httpPost()
-                .header("Authorization" to githubAppService.getAccessToken())
+                .header("Authorization" to githubAppService.getAccessToken(installationId))
                 .body(format(fileLinkPattern, repoName, repoOwner, branchName, fileName))
                 .responseObject(JsonObjectDeserializer()).third.get()
             val fileData =
